@@ -41,7 +41,7 @@
   var Validator = function (element, options) {
     this.options  = options
     this.$element = $(element)
-    this.$inputs  = this.$element.find(Validator.INPUT_SELECTOR)
+    this.$inputs  = this.$element.find(this.inputSelector(options))
     this.$btn     = $('button[type="submit"], input[type="submit"]')
                       .filter('[form="' + this.$element.attr('id') + '"]')
                       .add(this.$element.find('input[type="submit"], button[type="submit"]'))
@@ -57,7 +57,7 @@
     this.$element.attr('novalidate', true) // disable automatic native validation
     this.toggleSubmit()
 
-    this.$element.on('input.bs.validator change.bs.validator focusout.bs.validator', Validator.INPUT_SELECTOR, $.proxy(this.onInput, this))
+    this.$element.on('input.bs.validator change.bs.validator focusout.bs.validator', this.inputSelector(option, $.proxy(this.onInput, this))
     this.$element.on('submit.bs.validator', $.proxy(this.onSubmit, this))
 
     this.$element.find('[data-match]').each(function () {
@@ -69,8 +69,6 @@
       })
     })
   }
-
-  Validator.INPUT_SELECTOR = ':input:not([type="submit"], button):enabled'
 
   Validator.FOCUS_OFFSET = 20
 
@@ -103,6 +101,12 @@
       var minlength = $el.data('minlength')
       return !$el.val() || $el.val().length >= minlength
     }
+  }
+
+  Validator.prototype.inputSelector = function(options) {
+    var baseFilter = ':input:not([type="submit"], button):enabled'
+    if(options.includeHiddenFields) { return baseFilter }
+    return baseFilter + ':visible'
   }
 
   Validator.prototype.onInput = function (e) {
